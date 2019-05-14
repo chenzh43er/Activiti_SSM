@@ -1,16 +1,23 @@
 package com.shop.controller;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.task.Comment;
 import org.activiti.engine.task.Task;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
@@ -119,5 +126,43 @@ public class WorkFlowController {
 		this.workFlowService.submitTask(id, taskId, comment, employee.getName());
 		
 		return "redirect:/taskList";
+	}
+	
+	/**
+	 * 查看流程图
+	 * @param taskId
+	 * @return
+	 */
+	@RequestMapping(value = "viewCurrentImage")
+	public String viewCurrentImage(String taskId,ModelMap model) {
+		//1.获取任务ID 获取任务对象 使用任务对象获取流程定义Id 查询流程定义对象
+		ProcessDefinition pd = workFlowService.findProcessDefinitionByTaskId(taskId);
+		
+		model.addAttribute("deploymentId",pd.getDeploymentId());
+		model.addAttribute("imageName",pd.getDiagramResourceName());
+		
+		//2.查看当前活动任务，获取当期活动对应的坐标x,y,width,height,将值保存到Map<String,Object>
+		Map<String,Object> map = workFlowService.findCoordingByTaskId(taskId);
+		
+		model.addAttribute("acs",map);
+		
+		return "viewimage";
+	}
+	
+	@RequestMapping(value = "viewImage")
+	public String viewImage(String deploymentId,String imageName,HttpServletResponse response) throws IOException {
+		//1.获取资源文件表
+		InputStream in = workFlowService.findImageInputStream(deploymentId,imageName);
+		
+		//2.从response对象获取输出流
+		OutputStream out = response.getOutputStream();
+		
+		//3.将输入流的数据读取出来，写到输出流中
+		for(int b=-1;(b=in.read())!=-1;){
+			out.write(b);
+		}
+		out.close();
+		in.close();
+		return null;
 	}
 }

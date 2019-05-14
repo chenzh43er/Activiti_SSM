@@ -12,6 +12,7 @@ import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.impl.identity.Authentication;
+import org.activiti.engine.repository.ProcessDefinition;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Comment;
 import org.activiti.engine.task.Task;
@@ -133,6 +134,21 @@ public class WorkFlowServiceImpl implements WorkFlowService {
 			leavebill.setState(2);
 			leavebillMapper.updateByPrimaryKeySelective(leavebill);
 		}
+	}
+
+	@Override
+	public ProcessDefinition findProcessDefinitionByTaskId(String taskId) {
+		return null;
+	}
+
+	@Override
+	public Map<String, Object> findCoordingByTaskId(String taskId) {
+		return null;
+	}
+
+	@Override
+	public InputStream findImageInputStream(String deploymentId, String imageName) {
+		return null;
 	}
 
 }
